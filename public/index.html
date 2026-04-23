@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body { font-family: Arial; padding:10px; background:#f5f5f5;}
+.card { background:white; padding:10px; margin:10px 0; border-radius:8px;}
+input,button,select { width:100%; padding:10px; margin:5px 0;}
+button { background:green; color:white;}
+</style>
+</head>
+<body>
+
+<h2>Mill App</h2>
+
+<div class="card">
+<h3>Attendance</h3>
+<input id="name" placeholder="Name">
+<select id="status"><option>Present</option><option>Absent</option></select>
+<button onclick="post('/attendance',{name:name.value,status:status.value})">Save</button>
+</div>
+
+<div class="card">
+<h3>Stock</h3>
+<input id="opening" placeholder="Opening">
+<input id="production" placeholder="Production">
+<button onclick="saveStock()">Save</button>
+</div>
+
+<div class="card">
+<h3>Purchase</h3>
+<input id="pparty" placeholder="Party">
+<input id="pqty" placeholder="Qty">
+<button onclick="post('/purchase',{party:pparty.value,qty:pqty.value})">Save</button>
+</div>
+
+<div class="card">
+<h3>Sales</h3>
+<input id="sparty" placeholder="Party">
+<input id="sqty" placeholder="Qty">
+<button onclick="post('/sales',{party:sparty.value,qty:sqty.value})">Save</button>
+</div>
+
+<div class="card">
+<h3>Report</h3>
+<button onclick="loadReport()">Load</button>
+<div id="report"></div>
+</div>
+
+<script>
+const today = new Date().toISOString().slice(0,10);
+
+async function post(url,data){
+  data.date = today;
+  await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});
+  alert("Saved");
+}
+
+async function saveStock(){
+  const res = await fetch("/stock",{method:"POST",headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({opening:+opening.value,production:+production.value,date:today})});
+  const d = await res.json();
+  alert("Closing: "+d.closing);
+}
+
+async function loadReport(){
+  const r = await fetch("/report");
+  const d = await r.json();
+  report.innerHTML = `
+  Purchase: ${d.purchase}<br>
+  Sales: ${d.sales}<br>
+  Production: ${d.production}`;
+}
+</script>
+
+</body>
+</html>
